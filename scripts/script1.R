@@ -31,6 +31,8 @@ glimpse(blp_df)
 # * slice
 # * filter
 # * mutate
+# * transmute
+# * arrange
 
 # select four of the variables
 select(blp_df, participant, lex, resp, rt)
@@ -181,3 +183,98 @@ mutate(blp_df,
 
 mutate(blp_df, rt = round(rt/1000))
 
+mutate(blp_df, 
+       lex = as.factor(lex),
+       spell = as.factor(spell),
+       resp = as.factor(resp)
+)
+
+mutate(blp_df, 
+       across(where(is.character), as.factor)
+)
+
+mutate(blp_df,
+       rt = (rt - mean(rt, na.rm = T))/sd(rt, na.rm = T)
+)
+
+mutate(blp_df,
+       rt = as.vector(scale(rt))
+)
+
+mutate(blp_df,
+       across(rt:rt.raw, ~as.vector(scale(.)))
+)
+
+mutate(blp_df,
+       lex = recode(lex, 'W' = 'word', 'N' = 'nonword'),
+       resp = recode(resp, 'W' = 'word', 'N' = 'nonword'),
+)
+
+mutate(blp_df,
+       across(c(lex, resp), ~recode(., 'W' = 'word', 'N' = 'nonword'))
+)
+
+mutate(blp_df,
+       rt_speed = ifelse(rt > 1000, 'slow', 'fast')
+)
+
+mutate(blp_df,
+       rt_speed = case_when(
+         rt > 900 ~ 'slow',
+         rt < 600 ~ 'fast',
+         TRUE ~ 'medium'
+       )
+)
+
+transmute(blp_df,
+          rt_speed = case_when(
+            rt > 900 ~ 'slow',
+            rt < 600 ~ 'fast',
+            TRUE ~ 'medium'
+          )
+)
+
+# sorting with arrange ----------------------------------------------------
+
+arrange(blp_df, rt)
+arrange(blp_df, desc(rt))
+arrange(blp_df, participant, rt)
+arrange(blp_df, desc(participant), rt)
+
+
+
+# Pipelines ---------------------------------------------------------------
+
+x <- c(1, 2, 3, 4, 5, 6)
+log(x)
+sqrt(log(x))
+sum(sqrt(log(x)))
+log(sum(sqrt(log(x))))
+
+log(x)
+
+x %>% log()
+
+sqrt(log(x))
+
+x %>% log() %>% sqrt() %>% sum() %>% log()
+
+
+blp_df_tmp <- mutate(blp_df, accuracy = lex == resp)
+blp_df_tmp2 <- filter(blp_df_tmp, accuracy == FALSE)
+select(blp_df_tmp2, participant, rt.raw, resp)
+
+mutate(blp_df, accuracy = lex == resp) %>% 
+  filter(accuracy == FALSE) %>% 
+  select(participant, rt.raw, resp)
+
+blp_df %>% 
+  mutate(accuracy = lex == resp) %>% 
+  filter(accuracy == FALSE) %>% 
+  select(participant, rt.raw, resp)
+
+read_csv("https://raw.githubusercontent.com/mark-andrews/dwrs02/master/data/blp-trials-short.txt") %>%
+  mutate(accuracy = lex == resp) %>% 
+  filter(accuracy == FALSE) %>% 
+  select(participant, rt.raw, resp) -> blp_df_lite
+  
