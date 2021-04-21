@@ -30,6 +30,7 @@ glimpse(blp_df)
 # * rename
 # * slice
 # * filter
+# * mutate
 
 # select four of the variables
 select(blp_df, participant, lex, resp, rt)
@@ -149,3 +150,34 @@ filter(blp_df, rt < 500)
 filter(blp_df, lex == 'W', resp == 'W', rt < 500)
 filter(blp_df, (lex == 'W') & (resp == 'W') & (rt < 500))
 filter(blp_df, (lex == 'W') | (resp == 'W'))
+
+filter(blp_df, if_any(everything(), is.na))
+filter(blp_df, if_all(everything(), is.na))
+
+filter(blp_df, if_all(everything(), ~!is.na(.)))
+
+filter(blp_df, rt < 500)
+
+filter(blp_df, if_all(rt:rt.raw, ~. < 500))
+filter(blp_df, if_any(rt:rt.raw, ~. < 500))
+
+filter(blp_df, if_any(rt:rt.raw, ~. < median(., na.rm = T)))
+filter(blp_df, if_all(rt:rt.raw, ~. < median(., na.rm = T)))
+
+filter(blp_df, if_all(where(is.numeric), ~. < median(., na.rm = T)))
+
+# mutate ------------------------------------------------------------------
+
+mutate(blp_df, accuracy = lex == resp)
+mutate(blp_df, 
+       accuracy = lex == resp,
+       word_length = str_length(spell)
+)
+mutate(blp_df, 
+       accuracy = lex == resp,
+       word_length = str_length(spell),
+       fast_rt = rt < median(rt, na.rm = T)
+)
+
+mutate(blp_df, rt = round(rt/1000))
+
