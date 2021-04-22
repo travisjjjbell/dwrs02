@@ -80,6 +80,8 @@ messy_df %>%
   mutate(delta = stimulus_left_number_of_circles - stimulus_right_number_of_circles,
          choice_left = choice == stimulus_left,
          more_left = delta > 0,
-         accuracy = more_left == choice_left) %>% 
-  select(subject = ID, age, delta, accuracy, rt = latency)
+         accuracy = ifelse(more_left == choice_left, 'correct', 'incorrect')) %>% 
+  select(subject = ID, age, delta, accuracy, rt = latency) %>% 
+  mutate(delta = abs(delta),
+         age_group = cut(age, breaks = seq(10, 80, by = 10)))
 
