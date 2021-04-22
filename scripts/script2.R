@@ -188,3 +188,144 @@ data_dfs[[1]]
 
 final_df_2 <- dir_ls('data/exp_data') %>% map(read_csv) %>% bind_rows()
 list.files(d.env, pattern='tif$', full.names=TRUE ) 
+
+
+# lag and lead ------------------------------------------------------------
+
+Df_8 <- tibble(x = c(1, 2, 2, 3, 4, 5, 5, 6, 7, 8, 8))
+Df_8 %>%
+  mutate(before_x = lag(x),
+#         after_x = lead(x),
+         x_match_before = x == before_x) %>% 
+  select(-before_x)
+
+
+# pivots ------------------------------------------------------------------
+
+recall_df <- read_csv("https://raw.githubusercontent.com/mark-andrews/dwrs02/master/data/repeated_measured_a.csv")
+
+# subject condition recall
+# Faye Neg 26
+# Faye Neu 12
+# Faye Pos 42
+
+recall_df_long <- pivot_longer(recall_df, 
+                               -Subject,
+                               names_to = 'condition',
+                               values_to = 'recall')
+
+# subject emotion cue recall
+# Faye Neg Cued 15
+# Faye Nue Cued 16
+
+pivot_wider(recall_df_long,
+            names_from = condition,
+            values_from = recall)
+
+recall_df_b <- read_csv("https://raw.githubusercontent.com/mark-andrews/dwrs02/master/data/repeated_measured_b.csv")
+
+pivot_longer(recall_df_b,
+             -Subject,
+             names_to = 'condition',
+             values_to = 'recall') %>% 
+  separate(condition, into = c('cue', 'emotion'))
+
+pivot_longer(recall_df_b,
+             -Subject, 
+             names_to = c('cue', 'emotion'),
+             names_sep = '_',
+             values_to = 'recall')
+
+pivot_longer(recall_df_b,
+             -Subject, 
+             names_to = c('cue', 'emotion'),
+             names_pattern = '(.*)_(.*)',
+             values_to = 'recall')
+
+pivot_longer(recall_df_b, 
+             cols = -Subject, 
+             names_to = c('cue', 'emotion'), 
+             names_pattern = '(Cued|Free)_(Neg|Neu|Pos)', 
+             values_to = 'recall')
+
+
+blp_df_desc <- summarise(blp_df,
+          across(rt:rt.raw,
+                 list(avg = ~mean(., na.rm = T),
+                      med = ~median(., na.rm = T),
+                      stdev = ~sd(., na.rm = T)
+                 )
+          )
+)
+
+blp_df_desc %>% 
+  pivot_longer(cols = everything(),
+               names_to = 'var_summary',
+               values_to = 'descriptive') %>% 
+  separate(var_summary, into = c('variable', 'summary'), sep = '_') %>% 
+  pivot_wider(names_from = summary, values_from = descriptive)
+  
+               
+blp_df_desc %>% 
+  pivot_longer(cols = everything(),
+               names_to = c('variable', '.value'),
+               names_sep = '_')
+
+
+# nesting -----------------------------------------------------------------
+
+# solution 1: joins
+
+tidy_df_n <- tidy_df %>%
+  group_by(subject) %>% 
+  summarise(n = n())
+
+left_join(tidy_df, tidy_df_n) %>% 
+  filter(n > 90) %>% 
+  arrange(n)
+
+
+tidy_df %>% 
+  group_by(subject) %>% 
+  nest() %>% 
+  mutate(n = map_int(data, nrow)) %>% 
+  unnest(cols = c(data)) %>%
+  ungroup() %>% 
+  filter(n > 90) %>% 
+  select(-n)
+
+tidy_df %>% 
+  group_by(subject) %>% 
+  nest() %>% 
+  mutate(slope = map_dbl(data, ~coef(lm(rt ~ delta, data = .))[2])) %>% 
+  ungroup() %>% 
+  select(-data)
+  
+tidy_df %>% 
+  group_by(subject) %>% 
+  nest() %>% 
+  mutate(slope = map(data, ~coef(lm(rt ~ delta, data = .)))) %>% 
+  select(-data) %>% 
+  unnest_wider(col = slope) %>% 
+  rename(intercept = `(Intercept)`, slope = delta) %>% 
+  ungroup()
+
+# another messy example ---------------------------------------------------
+
+messy_df2 <- read_csv("https://raw.githubusercontent.com/mark-andrews/dwrs02/master/data/example_2_messy.csv")
+
+messy_df2 %>% 
+  rename_with(~str_c('List_1', ., sep = ' '), Hate:Mad) %>% 
+  rename_with(~str_c('List_2', ., sep = ' '), Over:Clouds) %>% 
+  pivot_longer(cols = starts_with('List_'),
+               names_to = c('list', 'item'),
+               names_sep = ' ',
+               values_to = 'response') %>% 
+  mutate(list = str_remove(list, 'List_'),
+         response = str_match(response, 'word is (.*)$')[,2],
+         response = plyr::mapvalues(response, 
+                                    from = c('new', 'probably new', 'probably old', 'old'), 
+                                    to = 1:4),
+         across(c(list, response), as.integer),
+         across(c(gender,item), tolower)) %>% 
+  rename(subject = `unique identification name`)
