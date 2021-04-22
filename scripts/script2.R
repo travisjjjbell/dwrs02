@@ -66,3 +66,20 @@ group_by(blp_df, lex) %>%
 group_by(blp_df, participant) %>% 
   summarise(n = n()) %>% 
   arrange(desc(n))
+
+
+# Making messy stuff nice and tidy example --------------------------------
+
+messy_df <- read_csv("https://raw.githubusercontent.com/mark-andrews/dwrs02/master/data/example_1_messy.csv")
+tidy_df <- read_csv("https://raw.githubusercontent.com/mark-andrews/dwrs02/master/data/example_1_tidy.csv")
+
+messy_df
+tidy_df
+
+messy_df %>% 
+  mutate(delta = stimulus_left_number_of_circles - stimulus_right_number_of_circles,
+         choice_left = choice == stimulus_left,
+         more_left = delta > 0,
+         accuracy = more_left == choice_left) %>% 
+  select(subject = ID, age, delta, accuracy, rt = latency)
+
