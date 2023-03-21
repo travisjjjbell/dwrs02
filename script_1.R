@@ -125,8 +125,6 @@ rename(blp_df,
        reaction_time = rt, lexical = lex
 )
 
-rename_with() # rename variables with this renaming function
-
 blp_names <- names(blp_df)
 
 rename_with(blp_df,
@@ -208,10 +206,39 @@ filter(blp_df,
 # These are disjunctions
 
 filter(blp_df,
-       lex == 'W' | # These ,means 'or'
-       resp == 'W'
+       lex == 'W' | resp == 'W' # This means 'or'
+       
+)
+
+filter(blp_df,
+       if_any(everything(),
+              is.na) # Show all rows that contain at least one missing value (NA) in any variable
+)
+
+filter(blp_df,
+       if_all(everything(), # show all rows that contain NA in all variables
+              is.na) 
+)
+
+filter(blp_df,
+       if_all(everything(), ~!is.na(.)) # does the same as na.omit
+)
+
+filter(blp_df,
+       if_all(rt:rt.raw, ~. < 500) # The period is a place holder the each of the three variables
+)
+
+filter(blp_df,
+       if_any(rt:rt.raw, ~. < 500)
+)
+
+filter(blp_df,
+       if_any(rt:rt.raw, ~. < median(., na.rm = TRUE))
 )
 
 
+filter(blp_df,
+       if_all(rt:rt.raw, ~. < median(., na.rm = TRUE))
+)
 
 
