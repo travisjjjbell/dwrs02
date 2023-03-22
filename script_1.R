@@ -25,6 +25,8 @@ glimpse(blp_df)
 # * relocate
 # * rename
 # * slice
+# * filter
+# * mutate
 
 # manipulating data frames ------------------------------------------------
 
@@ -241,4 +243,55 @@ filter(blp_df,
        if_all(rt:rt.raw, ~. < median(., na.rm = TRUE))
 )
 
+filter(blp_df,
+       if_all(where(is.numeric), ~. < median(., na.rm = TRUE))
+)
 
+
+# Mutate ------------------------------------------------------------------
+
+mutate(blp_df,
+       accuracy = lex == resp # create a new variable showing where lex is equal to the value of resp
+) 
+
+mutate(blp_df,
+       accuracy = lex == resp,
+       word_length = str_length(spell) # new variable showing the character length from variable spell
+)
+
+mutate(blp_df,
+       accuracy = lex == resp,
+       word_length = str_length(spell),
+       fast_rt = rt < median(rt, na.rm = T) # new variable showing the fast reaction 
+                                            # times when they are less than the median
+)
+
+mutate(blp_df,
+       rt = round(rt/1000) # modify a current variable, change to seconds from milliseconds
+)
+
+mutate(blp_df,
+       lex = as.factor(lex),
+       spell = as.factor(spell),
+       resp = as.factor(resp)
+) # factors are categorical variables
+
+mutate(blp_df,
+       across(where(is.character), as.factor)
+) # change multiple variables at once
+
+mutate(blp_df,
+       rt = (rt - mean(rt, na.rm = T)) / sd(rt, na.rm = T)
+)
+
+mutate(blp_df,
+       rt = as.vector(scale(rt))
+) # does the same as the code above
+
+mutate(blp_df,
+       across(rt:rt.raw, ~ as.vector(scale(.)))
+)
+
+mutate(blp_df,
+       across(lex:resp, as.factor)
+)
