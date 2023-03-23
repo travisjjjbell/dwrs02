@@ -27,6 +27,8 @@ glimpse(blp_df)
 # * slice
 # * filter
 # * mutate
+# * transmute
+# * arrange
 
 # manipulating data frames ------------------------------------------------
 
@@ -292,6 +294,92 @@ mutate(blp_df,
        across(rt:rt.raw, ~ as.vector(scale(.)))
 )
 
+# re-coding:
 mutate(blp_df,
-       across(lex:resp, as.factor)
+       lex = recode(lex, 'W' = 'word', 'N' = 'nonword')
 )
+
+mutate(blp_df,
+       across(c(lex, resp), ~recode(., 'W' = 'word', 'N' = 'nonword'))
+)
+
+mutate(blp_df,
+       rt_speed = ifelse(rt > 1000, 'slow', 'fast')
+) # new variable, if this condition is true, return 'slow', if not, return 'fast'
+
+mutate(blp_df,
+       rt_speed = case_when(
+       rt > 1000 ~ 'slow',
+       rt < 500 ~ 'fast',
+       TRUE ~ 'medium'
+       )
+) # three different classifications
+
+
+# Transmute ---------------------------------------------------------------
+
+
+transmute(blp_df,
+       rt_speed = case_when(
+         rt > 1000 ~ 'slow',
+         rt < 500 ~ 'fast',
+         TRUE ~ 'medium'
+       )
+) # only returns the mutated variables 
+
+
+# Arrange -----------------------------------------------------------------
+
+arrange(blp_df,
+        rt
+) # sorts df by rt in ascending order
+
+arrange(blp_df,
+        desc(rt),
+) # same but descending order
+
+arrange(blp_df,
+        participant,
+        rt
+) # sort by participant first, then rt
+
+arrange(blp_df,
+        desc(participant),
+        rt
+)
+
+
+# Pipelines ---------------------------------------------------------------
+
+x <- c(1, 2, 3, 4, 5, 6)
+log(x)
+sqrt(log(x))
+sum(sqrt(log(x)))
+log(sum(sqrt(log(x))))# these are nested functions
+
+x %>% log()
+x %>% log() %>% sqrt() 
+x %>% log() %>% sqrt() %>% log() # These do the same as above
+
+blp_df_tmp <- mutate(blp_df,
+       accuracy = lex == resp
+)
+blp_df_temp2 <- filter(blp_df_tmp, 
+       accuracy == F
+)
+select(blp_df_temp2,
+       participant,
+       rt.raw,
+       resp
+) # created temporary data frames
+
+mutate(blp_df,
+       accuracy = lex == resp) %>% 
+  filter(accuracy == F) %>% 
+  select(participant,
+         rt.raw,
+         resp
+  ) # using pipes instead of temporary data frames
+
+
+
