@@ -1,1 +1,1 @@
-# Finished day 1, 3-5pm
+# day1 session 3: 1:36:10
