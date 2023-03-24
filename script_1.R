@@ -381,5 +381,13 @@ mutate(blp_df,
          resp
   ) # using pipes instead of temporary data frames
 
+blp_df %>% 
+  mutate(accuracy = lex == resp) %>% 
+  filter(accuracy == F) %>% 
+  select(participant,
+         rt.raw,
+         resp
+  ) # different way to write the same code, read in the data first ( better way)
+
 
 
