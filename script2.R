@@ -82,3 +82,11 @@ group_by(blp_df, participant) %>%
   summarise(n = n()) %>% 
   arrange(desc(n)
   )
+
+
+# Making messy stuff nice and tidy example -------------------------------
+
+
+messy_df <- read_csv('data/example_1_messy.csv')
+
+tidy_df <-  read_csv('data/example_1_tidy.csv')
