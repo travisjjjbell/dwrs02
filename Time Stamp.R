@@ -1,1 +1,1 @@
-# day1 session 3: 1:36:10
+# day 2 session 2 Start of video

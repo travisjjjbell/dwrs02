@@ -93,3 +93,16 @@ tidy_df <-  read_csv('data/example_1_tidy.csv')
 
 messy_df
 tidy_df
+
+messy_df %>% 
+  mutate(delta = stimulus_left_number_of_circles - stimulus_right_number_of_circles,
+         choice_left = choice == stimulus_left,
+         more_left = delta > 0,
+         accuracy = ifelse(choice_left == more_left, 'correct', 'incorrect')
+         ) %>% 
+  select(subject = ID, age, delta, accuracy, rt = latency
+         ) %>% 
+  mutate(delta = abs(delta),
+         age_group = cut(age, breaks = seq(10, 80, by = 10))
+         )
+
