@@ -90,3 +90,6 @@ group_by(blp_df, participant) %>%
 messy_df <- read_csv('data/example_1_messy.csv')
 
 tidy_df <-  read_csv('data/example_1_tidy.csv')
+
+messy_df
+tidy_df
