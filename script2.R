@@ -103,6 +103,7 @@ messy_df %>%
   select(subject = ID, age, delta, accuracy, rt = latency
          ) %>% 
   mutate(delta = abs(delta),
-         age_group = cut(age, breaks = seq(10, 80, by = 10))
-         )
-
+         age_group = cut(age, breaks = seq(10, 80, by = 10)),
+         age_group = str_remove_all(age_group, '[\\(\\]]'), # \\ means treat that symbol as a literal opening bracket, not as syntactically in regular expressions
+         age_group = str_replace(age_group, ',', '-')
+  )
