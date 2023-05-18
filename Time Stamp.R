@@ -1,1 +1,1 @@
-# dwrs02 - day 2 session 2 Start of video
+# dwrs02 - day 2 session 2: 58:19

@@ -105,8 +105,9 @@ messy_df %>%
   mutate(delta = abs(delta),
          age_group = cut(age, breaks = seq(10, 80, by = 10)),
          age_group = str_remove_all(age_group, '[\\(\\]]'), # \\ means treat that symbol as a literal opening bracket, not as syntactically in regular expressions
+                                                            # The square brackets indicate a set of symbols (using them syntactically)
          age_group = str_replace(age_group, ',', '-')
-  )
+  ) 
 
 # Combining data frames ---------------------------------------------------
 
@@ -148,19 +149,25 @@ Df_7 <- tibble(y = c(6, 7),
 Df_8 <- tibble(x = c(1, 2, 2, 3, 4, 5, 5, 6, 7, 8, 8))
 
 
+Df_1
+Df_2
 bind_rows(Df_1, Df_2)
 
-bind_cols(Df_1, Df_3)
+Df_3
+bind_rows(Df_1, Df_3) #This works but not really bc it fills gaps with NA
+bind_cols(Df_1, Df_3) #works better for these two data frames
 
 
+Df_a
+Df_b
 
-
-inner_join(Df_a, Df_b)
+inner_join(Df_a, Df_b) #matching rows based on values of common variables, value 1 and four don't get matched in the join
 left_join(Df_a, Df_b)
 right_join(Df_a, Df_b)
-full_join(Df_a, Df_b)
+full_join(Df_a, Df_b) #also known as outer join
 
 stimuli <- read_csv('data/blp_stimuli.csv')
+stimuli
 
 inner_join(blp_df, stimuli)
 
@@ -168,12 +175,12 @@ filter(stimuli, spell == 'staud')
 
 all.equal(left_join(blp_df, stimuli),
           inner_join(blp_df, stimuli)
-          )
+)
 
 inner_join(Df_4, Df_5) # won't work because none of the variables are matching 
 
 inner_join(Df_4, Df_5, by = c('x' = 'a') # changing the variable name to match data set varibables
-           )
+)
 
 Df_5_alt <- rename(Df_5, x = a, y = b)
 
