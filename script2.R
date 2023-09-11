@@ -164,22 +164,34 @@ Df_b
 inner_join(Df_a, Df_b) #matching rows based on values of common variables, value 1 and four don't get matched in the join
 left_join(Df_a, Df_b)
 right_join(Df_a, Df_b)
-full_join(Df_a, Df_b) #also known as outer join
+full_join(Df_a, Df_b) #also known as outer join, preserves all info
 
 stimuli <- read_csv('data/blp_stimuli.csv')
 stimuli
 
-inner_join(blp_df, stimuli)
+
+inner_join(blp_df, stimuli) #any row that occurs in stimuli, but not in blp_df will not be shown in new table
 
 filter(stimuli, spell == 'staud')
 
-all.equal(left_join(blp_df, stimuli),
+all_equal(left_join(blp_df, stimuli),
           inner_join(blp_df, stimuli)
-)
+) # this equals true, meaning they are the same
+
+
+right_join(blp_df, stimuli) %>% slice(50000:50010) # showing the NA's by selecting specific rows to show 
+
+all_equal(right_join(blp_df, stimuli),
+          inner_join(blp_df, stimuli)
+) # Won't work, more rows in stimuli than in blp_df
+
+all_equal(right_join(blp_df, stimuli),
+          full_join(blp_df, stimuli)
+) # Will work, presevres all rows
 
 inner_join(Df_4, Df_5) # won't work because none of the variables are matching 
 
-inner_join(Df_4, Df_5, by = c('x' = 'a') # changing the variable name to match data set varibables
+inner_join(Df_4, Df_5, by = c('x' = 'a') # changing the variable name to match data set variables
 )
 
 Df_5_alt <- rename(Df_5, x = a, y = b)
@@ -188,24 +200,34 @@ inner_join(Df_4, Df_5_alt, by = 'x') # to only match one variable, not both
 
 subjects <- read_csv('data/example_1_subjects.csv')
 subjects
-left_join(tidy_df, subjects, by = c('subject' = 'ID')) %>% 
+
+left_join(tidy_df, subjects, by = c(
+  'subject' = 'ID')
+) %>%
   group_by(is_mobile) %>% 
-  summarize(avg = mean(rt, na.rm = T),
-            sd = sd(rt, na.rm = T))
+  summarise(avg = mean(rt, na.rm = T),
+            sd = sd(rt, na.rm = T)
+  )
+
+
 
 x <- list(a = 10, b = 5, c = 3)
 lapply(x, runif)
-map(x, runif) # purr version of lapply function, which is better than lapply
-
-
+map(x, runif) # purr version (tidyverse) of lapply function (base R), which is better than lapply
+# Pass each variable from a list through a function (this case it's runif)
 
 library(fs)
-data_dfs <- dir_ls('data/exp_data') %>% map(read_csv)
+data_dfs <- dir_ls('data/exp_data') %>% 
+  map(read_csv) #allows you to read multiple csv's at one time if they are within a folder 
+
 
 class(data_dfs)
 final_df <- bind_rows(data_dfs)
 class(final_df)
 names(data_dfs)
-data_dfs[[1]]
+data_dfs[[1]] #to view the first df in the data_dfs list
 
-data_dfs_2 <- dir_ls('data/exp_data') %>% map(read_csv) %>% bind_rows()
+data_dfs_2 <- dir_ls('data/exp_data') %>% 
+  map(read_csv) %>% 
+  bind_rows()
+
